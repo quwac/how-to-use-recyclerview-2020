@@ -27,8 +27,9 @@ class MainViewModel : ViewModel() {
     fun addElement() {
         val p = (index % 26).toInt()
         val name = ('A' + p).toString()
+        val userType = UserType.values().first { it.ordinal == (index % 2).toInt() }
 
-        val user = User(index, name).apply {
+        val user = User(index, name, userType).apply {
             usersText.addSource(isChecked) {
                 updateUsersText()
             }

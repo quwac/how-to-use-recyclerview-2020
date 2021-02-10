@@ -2,11 +2,13 @@ package io.github.quwac.how_to_use_recyclerview_2020.ui.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.github.quwac.how_to_use_recyclerview_2020.databinding.UserViewBinding
+import io.github.quwac.how_to_use_recyclerview_2020.databinding.UserViewSwitchableBinding
+import io.github.quwac.how_to_use_recyclerview_2020.databinding.UserViewUnswitchableBinding
 
 private object DiffCallback : DiffUtil.ItemCallback<User>() {
     override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
@@ -24,9 +26,18 @@ class UserListAdapter(
     private val viewModel: MainViewModel
 ) : ListAdapter<User, UserListAdapter.UserViewHolder>(DiffCallback) {
 
-    class UserViewHolder(private val binding: UserViewBinding) :
+    abstract class UserViewHolder(binding: ViewDataBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(item: User, viewLifecycleOwner: LifecycleOwner, viewModel: MainViewModel) {
+        abstract fun bind(item: User, viewLifecycleOwner: LifecycleOwner, viewModel: MainViewModel)
+    }
+
+    class UserViewSwitchableHolder(private val binding: UserViewSwitchableBinding) :
+        UserViewHolder(binding) {
+        override fun bind(
+            item: User,
+            viewLifecycleOwner: LifecycleOwner,
+            viewModel: MainViewModel
+        ) {
             binding.run {
                 lifecycleOwner = viewLifecycleOwner
                 user = item
@@ -35,12 +46,49 @@ class UserListAdapter(
                 executePendingBindings()
             }
         }
+    }
 
+    class UserViewUnswitchableHolder(private val binding: UserViewUnswitchableBinding) :
+        UserViewHolder(binding) {
+        override fun bind(
+            item: User,
+            viewLifecycleOwner: LifecycleOwner,
+            viewModel: MainViewModel
+        ) {
+            binding.run {
+                lifecycleOwner = viewLifecycleOwner
+                user = item
+
+                executePendingBindings()
+            }
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        return getItem(position).userType.ordinal
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return UserViewHolder(UserViewBinding.inflate(layoutInflater, parent, false))
+
+        @Suppress("MoveVariableDeclarationIntoWhen")
+        val type = UserType.values().first { it.ordinal == viewType }
+        return when (type) {
+            UserType.USER_SWITCHABLE -> UserViewSwitchableHolder(
+                UserViewSwitchableBinding.inflate(
+                    layoutInflater,
+                    parent,
+                    false
+                )
+            )
+            UserType.USER_UNSWITCHABLE -> UserViewUnswitchableHolder(
+                UserViewUnswitchableBinding.inflate(
+                    layoutInflater,
+                    parent,
+                    false
+                )
+            )
+        }
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
