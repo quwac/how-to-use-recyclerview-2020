@@ -56,7 +56,6 @@ class UserListAdapter(
             viewModel: MainViewModel
         ) {
             binding.run {
-                lifecycleOwner = viewLifecycleOwner
                 user = item
 
                 executePendingBindings()
