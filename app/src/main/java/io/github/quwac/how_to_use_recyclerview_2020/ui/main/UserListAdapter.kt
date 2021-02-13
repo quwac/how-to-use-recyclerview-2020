@@ -71,7 +71,7 @@ class UserListAdapter(
         val layoutInflater = LayoutInflater.from(parent.context)
 
         @Suppress("MoveVariableDeclarationIntoWhen")
-        val type = UserType.values().first { it.ordinal == viewType }
+        val type = UserType.values()[viewType]
         return when (type) {
             UserType.USER_SWITCHABLE -> UserViewSwitchableHolder(
                 UserViewSwitchableBinding.inflate(
